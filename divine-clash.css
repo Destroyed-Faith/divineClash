@@ -23,6 +23,29 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.ready-summary {
+  font-size: 0.9em;
+  color: #cbd5ff;
+}
+
+.status-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #4a5568;
+  color: #fff;
+}
+
+.status-pill.ready {
+  background: #48bb78;
+}
+
+.status-pill.pending {
+  background: #ed8936;
+}
+
 .clash-controls {
   display: flex;
   gap: 10px;
@@ -182,6 +205,112 @@
   padding: 10px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+.distribution-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.stone-drop-zone {
+  flex: 1;
+  min-width: 220px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px dashed #4a4a4a;
+  border-radius: 6px;
+}
+
+.ready-zone {
+  flex-basis: 100%;
+}
+
+.stone-drop-zone .zone-header {
+  padding: 6px 10px;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  color: #ffd700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stone-drop-zone .zone-count {
+  font-size: 0.85em;
+  color: #fff;
+  margin-left: 6px;
+}
+
+.stone-zone-body {
+  min-height: 70px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stone-cube {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(145deg, #ff4d4d, #a80000);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+
+.stone-cube.dragging {
+  opacity: 0.5;
+}
+
+.stone-drop-zone.drop-active {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.distribution-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.finish-btn,
+.reset-allocation-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.finish-btn {
+  background: #48bb78;
+  color: #fff;
+}
+
+.finish-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reset-allocation-btn {
+  background: #805ad5;
+  color: #fff;
+}
+
+.allocation-summary {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.allocation-summary.viewer {
+  flex-direction: column;
+  gap: 6px;
 }
 
 .allocation-controls {

@@ -9,6 +9,17 @@ Hooks.once('init', async function() {
   Handlebars.registerHelper('lt', function(a, b) {
     return a < b;
   });
+  Handlebars.registerHelper('or', function(a, b) {
+    return a || b;
+  });
+  Handlebars.registerHelper('repeat', function(count, options) {
+    let result = '';
+    const iterations = Number(count) || 0;
+    for (let i = 0; i < iterations; i++) {
+      result += options.fn(i);
+    }
+    return result;
+  });
 
   // Register game settings
   game.settings.register('divine-clash', 'masteryRank', {
@@ -81,6 +92,9 @@ function handleSocketMessage(data) {
       // Regenerated, refresh UI
       divineClashManager.updateUI();
       break;
+    case 'resetAllocation':
+      divineClashManager.resetAllocation(data.userId, { broadcast: false });
+      break;
   }
 }
 
@@ -106,7 +120,7 @@ class DivineClashManager {
 
     // Initialize player states
     for (const participant of participants) {
-      const vitality = vitalityCounts[participant.id] || 10;
+      const vitality = vitalityCounts[participant.id] ?? 2;
       const stones = initialStones[participant.id] || { attack: 5, defense: 5 };
       
       // Create initial stone pool
@@ -123,13 +137,17 @@ class DivineClashManager {
         vitality: vitality,
         vitalityMax: vitality,
         ready: readyStones,
+        pending: [],
         exhausted: [],
         burned: [],
         masteryRank: this.getMasteryRank(participant.actorId),
         allocation: {
           attack: 0,
           defense: 0,
-          revealed: false
+          revealed: false,
+          ready: false,
+          baseAttack: 0,
+          baseDefense: 0
         },
         overdrive: {
           active: false,
@@ -221,17 +239,20 @@ class DivineClashManager {
       return false;
     }
 
+    // Move stones from ready to pending (committed this round)
+    const committedStones = state.ready.splice(0, totalAllocated);
+    state.pending = state.pending || [];
+    state.pending.push(...committedStones);
+
     // Set allocation (overdrive bonus is added to the displayed values)
     state.allocation = {
       attack: attack + (state.overdrive?.attackBonus || 0),
       defense: defense + (state.overdrive?.defenseBonus || 0),
       revealed: false,
       baseAttack: attack,
-      baseDefense: defense
+      baseDefense: defense,
+      ready: true
     };
-
-    // Note: Stones are not removed from ready pool yet - they'll be moved to exhausted after resolution
-    // This allows players to change their allocation before reveal
 
     // Update UI
     this.updateUI();
@@ -242,6 +263,33 @@ class DivineClashManager {
       userId: userId,
       allocation: state.allocation
     });
+
+    return true;
+  }
+  
+  /**
+   * Reset allocation for a player (moves pending stones back to ready)
+   */
+  async resetAllocation(userId, { broadcast = true } = {}) {
+    const state = this.playerStates.get(userId);
+    if (!state || !state.allocation.ready) return false;
+
+    if (state.pending?.length) {
+      state.ready.unshift(...state.pending);
+      state.pending = [];
+    }
+
+    state.allocation = { attack: 0, defense: 0, revealed: false, baseAttack: 0, baseDefense: 0, ready: false };
+    state.overdrive = { active: false, attackBonus: 0, defenseBonus: 0, burnedThisRound: 0 };
+
+    this.updateUI();
+
+    if (broadcast) {
+      game.socket.emit('module.divine-clash', {
+        type: 'resetAllocation',
+        userId: userId
+      });
+    }
 
     return true;
   }
@@ -314,14 +362,11 @@ class DivineClashManager {
     // Move allocated stones to exhausted
     for (const state of this.playerStates.values()) {
       // Use base allocation (without overdrive bonus) for moving stones
-      const baseAttack = state.allocation.baseAttack || 0;
-      const baseDefense = state.allocation.baseDefense || 0;
-      const totalUsed = baseAttack + baseDefense;
-      
-      // Move stones from ready to exhausted
-      for (let i = 0; i < totalUsed && state.ready.length > 0; i++) {
-        state.exhausted.push(state.ready.pop());
+      const pendingStones = state.pending || [];
+      for (const stone of pendingStones) {
+        state.exhausted.push(stone);
       }
+      state.pending = [];
 
       // Update mastery rank if stones were burned
       if (state.overdrive.burnedThisRound > 0) {
@@ -329,7 +374,7 @@ class DivineClashManager {
       }
 
       // Reset allocation
-      state.allocation = { attack: 0, defense: 0, revealed: false, baseAttack: 0, baseDefense: 0 };
+      state.allocation = { attack: 0, defense: 0, revealed: false, baseAttack: 0, baseDefense: 0, ready: false };
       state.overdrive = { active: false, attackBonus: 0, defenseBonus: 0, burnedThisRound: 0 };
     }
 
@@ -468,6 +513,7 @@ class DivineClashUI extends Application {
   constructor(manager) {
     super();
     this.manager = manager;
+    this.draggedElement = null;
   }
 
   static get defaultOptions() {
@@ -503,25 +549,32 @@ class DivineClashUI extends Application {
         exhausted: state.exhausted,
         burned: state.burned,
         masteryRank: state.masteryRank,
-        allocation: state.allocation,
+        allocation: {
+          attack: state.allocation?.attack || 0,
+          defense: state.allocation?.defense || 0,
+          revealed: state.allocation?.revealed || false,
+          ready: !!state.allocation?.ready
+        },
         overdrive: state.overdrive,
         isOwner: isOwner
       };
     });
 
+    const readySummary = {
+      ready: participants.filter(p => p.allocation.ready).length,
+      total: participants.length
+    };
+
     return {
       participants: participants,
       isGM: isGM,
-      currentUserId: currentUserId
+      currentUserId: currentUserId,
+      readySummary
     };
   }
 
   activateListeners(html) {
     super.activateListeners(html);
-
-    // Allocation controls
-    html.find('.allocate-btn').on('click', this._onAllocate.bind(this));
-    html.find('.attack-input, .defense-input').on('change', this._updateAllocationPreview.bind(this));
 
     // Clash controls
     html.find('.reveal-btn').on('click', this._onReveal.bind(this));
@@ -531,49 +584,33 @@ class DivineClashUI extends Application {
     // GM controls
     html.find('.distribute-btn').on('click', this._onDistributeStones.bind(this));
 
+    // Player distribution controls
+    html.find('.finish-btn').on('click', this._onFinishDistribution.bind(this));
+    html.find('.reset-allocation-btn').on('click', this._onResetDistribution.bind(this));
+
+    // Drag and drop for stones
+    html.on('dragstart', '.stone-draggable', this._onStoneDragStart.bind(this));
+    html.on('dragend', '.stone-draggable', this._onStoneDragEnd.bind(this));
+    html.on('dragover', '.stone-drop-zone', this._onStoneDragOver.bind(this));
+    html.on('dragleave', '.stone-drop-zone', this._onStoneDragLeave.bind(this));
+    html.on('drop', '.stone-drop-zone', this._onStoneDrop.bind(this));
+
     // Overdrive
     html.find('.overdrive-checkbox').on('change', this._onOverdriveToggle.bind(this));
 
     // Team actions
     html.find('.combined-attack-btn').on('click', this._onCombinedAttack.bind(this));
     html.find('.group-defense-btn').on('click', this._onGroupDefense.bind(this));
+
+    this._initializeBoards(html);
   }
 
-  async _onAllocate(event) {
-    const panel = $(event.currentTarget).closest('.participant-panel');
-    const userId = panel.data('user-id');
-    const attack = parseInt(panel.find('.attack-input').val()) || 0;
-    const defense = parseInt(panel.find('.defense-input').val()) || 0;
-
-    const overdrive = {
-      active: panel.find('.overdrive-checkbox').is(':checked'),
-      burned: parseInt(panel.find('.burn-input').val()) || 0,
-      attackBonus: parseInt(panel.find('.attack-bonus-input').val()) || 0,
-      defenseBonus: parseInt(panel.find('.defense-bonus-input').val()) || 0
-    };
-
-    const success = await this.manager.allocateStones(userId, attack, defense, overdrive);
-    
-    if (success) {
-      ui.notifications.info('Stones allocated!');
-    }
-  }
-
-  _updateAllocationPreview(event) {
-    const panel = $(event.currentTarget).closest('.participant-panel');
-    const attack = parseInt(panel.find('.attack-input').val()) || 0;
-    const defense = parseInt(panel.find('.defense-input').val()) || 0;
-    const total = attack + defense;
-    const userId = panel.data('user-id');
-    const state = this.manager.getPlayerState(userId);
-    const available = state ? state.ready.length : 0;
-
-    if (total > available) {
-      $(event.currentTarget).addClass('error');
-      ui.notifications.warn(`Total allocation (${total}) exceeds available stones (${available})`);
-    } else {
-      $(event.currentTarget).removeClass('error');
-    }
+  _initializeBoards(html) {
+    html.find('.participant-panel[data-owner="true"]').each((_, element) => {
+      const panel = $(element);
+      if (!panel.find('.distribution-board').length) return;
+      this._updateDistributionState(panel);
+    });
   }
 
   async _onReveal(event) {
@@ -642,6 +679,109 @@ class DivineClashUI extends Application {
 
     await this.manager.distributeStones(userId, stones);
     ui.notifications.info(`Distributed ${count} stones`);
+  }
+
+  async _onFinishDistribution(event) {
+    const panel = $(event.currentTarget).closest('.participant-panel');
+    const userId = panel.data('user-id');
+    const isOwner = panel.data('owner');
+    if (!isOwner) return;
+
+    const readyZone = panel.find('.ready-zone .stone-zone-body');
+    const readyCount = readyZone.children('.stone-draggable').length;
+    if (readyCount > 0) {
+      ui.notifications.warn('Verteile alle Steine auf Angriff und Verteidigung, bevor du abschließt.');
+      return;
+    }
+
+    const attackCount = panel.find('.attack-zone .stone-zone-body .stone-draggable').length;
+    const defenseCount = panel.find('.defense-zone .stone-zone-body .stone-draggable').length;
+
+    const overdrive = {
+      active: panel.find('.overdrive-checkbox').is(':checked'),
+      burned: parseInt(panel.find('.burn-input').val()) || 0,
+      attackBonus: parseInt(panel.find('.attack-bonus-input').val()) || 0,
+      defenseBonus: parseInt(panel.find('.defense-bonus-input').val()) || 0
+    };
+
+    const success = await this.manager.allocateStones(userId, attackCount, defenseCount, overdrive);
+    if (success) {
+      ui.notifications.info('Verteilung abgeschlossen!');
+      this.render(false);
+    }
+  }
+
+  async _onResetDistribution(event) {
+    const panel = $(event.currentTarget).closest('.participant-panel');
+    const userId = panel.data('user-id');
+    await this.manager.resetAllocation(userId);
+  }
+
+  _onStoneDragStart(event) {
+    const panel = $(event.currentTarget).closest('.participant-panel');
+    if (!panel.data('owner')) return;
+    this.draggedElement = event.currentTarget;
+    const dataTransfer = event.originalEvent?.dataTransfer;
+    if (dataTransfer) {
+      dataTransfer.setData('text/plain', $(event.currentTarget).data('stone-id') || 'stone');
+      dataTransfer.effectAllowed = 'move';
+    }
+    event.currentTarget.classList.add('dragging');
+  }
+
+  _onStoneDragEnd(event) {
+    event.currentTarget.classList.remove('dragging');
+    this.draggedElement = null;
+  }
+
+  _onStoneDragOver(event) {
+    const panel = $(event.currentTarget).closest('.participant-panel');
+    if (!panel.data('owner')) return;
+    event.preventDefault();
+    const zone = $(event.currentTarget).hasClass('stone-drop-zone')
+      ? $(event.currentTarget)
+      : $(event.currentTarget).closest('.stone-drop-zone');
+    zone.addClass('drop-active');
+  }
+
+  _onStoneDragLeave(event) {
+    const zone = $(event.currentTarget).hasClass('stone-drop-zone')
+      ? $(event.currentTarget)
+      : $(event.currentTarget).closest('.stone-drop-zone');
+    zone.removeClass('drop-active');
+  }
+
+  _onStoneDrop(event) {
+    event.preventDefault();
+    const panel = $(event.currentTarget).closest('.participant-panel');
+    const zone = $(event.currentTarget).hasClass('stone-drop-zone')
+      ? $(event.currentTarget)
+      : $(event.currentTarget).closest('.stone-drop-zone');
+    zone.removeClass('drop-active');
+
+    if (!panel.data('owner')) return;
+    if (!this.draggedElement) return;
+
+    const targetBody = zone.find('.stone-zone-body');
+    targetBody.append(this.draggedElement);
+    this.draggedElement = null;
+    this._updateDistributionState(panel);
+  }
+
+  _updateDistributionState(panel) {
+    if (!panel || !panel.length) return;
+    const attackCount = panel.find('.attack-zone .stone-zone-body .stone-draggable').length;
+    const defenseCount = panel.find('.defense-zone .stone-zone-body .stone-draggable').length;
+    const readyCount = panel.find('.ready-zone .stone-zone-body .stone-draggable').length;
+
+    panel.find('.attack-zone .zone-count').text(attackCount);
+    panel.find('.defense-zone .zone-count').text(defenseCount);
+    panel.find('.ready-zone .zone-count').text(readyCount);
+
+    const finishBtn = panel.find('.finish-btn');
+    if (finishBtn.length) {
+      finishBtn.prop('disabled', readyCount > 0);
+    }
   }
 
   _onOverdriveToggle(event) {
@@ -812,7 +952,7 @@ class StartClashDialog extends Dialog {
 
     let content = '<div class="start-clash-dialog">';
     content += '<p>Teilnehmer aus ausgewählten Tokens:</p>';
-    content += '<table><thead><tr><th>Select</th><th>Token</th><th>Vitality</th><th>Attack Stones</th><th>Defense Stones</th></tr></thead><tbody>';
+    content += '<table><thead><tr><th>Select</th><th>Token</th><th>Vitality</th><th>Active Stones (Attack)</th><th>Active Stones (Defense)</th></tr></thead><tbody>';
 
     for (const token of selectedTokens) {
       const actor = token.actor;
@@ -839,7 +979,7 @@ class StartClashDialog extends Dialog {
         
         // Get values from token flags or defaults
         const vitality = (tokenDoc.getFlag?.('divine-clash', 'vitality')) ?? 
-                        (actor.getFlag?.('divine-clash', 'vitality')) ?? 10;
+                        (actor.getFlag?.('divine-clash', 'vitality')) ?? 2;
         const attackStones = (tokenDoc.getFlag?.('divine-clash', 'attackStones')) ?? 
                             (actor.getFlag?.('divine-clash', 'attackStones')) ?? 5;
         const defenseStones = (tokenDoc.getFlag?.('divine-clash', 'defenseStones')) ?? 
@@ -877,7 +1017,7 @@ class StartClashDialog extends Dialog {
               const tokenId = $(this).data('token-id');
               const row = $(this).closest('tr');
               
-              const vitality = parseInt(row.find('.vitality-input').val()) || 10;
+              const vitality = parseInt(row.find('.vitality-input').val()) || 2;
               const attackStones = parseInt(row.find('.attack-stones-input').val()) || 5;
               const defenseStones = parseInt(row.find('.defense-stones-input').val()) || 5;
               
@@ -938,6 +1078,7 @@ Hooks.once('ready', async function() {
 window.DivineClash = {
   getManager: () => divineClashManager,
   startClash: (participants, vitalityCounts) => divineClashManager?.startClash(participants, vitalityCounts),
-  distributeStones: (userId, stones) => divineClashManager?.distributeStones(userId, stones)
+  distributeStones: (userId, stones) => divineClashManager?.distributeStones(userId, stones),
+  resetAllocation: (userId) => divineClashManager?.resetAllocation(userId)
 };
 

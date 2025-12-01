@@ -2,7 +2,7 @@
   "id": "divine-clash",
   "title": "Divine Clash",
   "description": "A dice-less combat system for Foundry VTT where players use stones instead of dice for divine combat.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": {
     "minimum": "10",
     "verified": "11"
