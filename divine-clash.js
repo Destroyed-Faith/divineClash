@@ -97,7 +97,7 @@ class DivineClashManager {
   /**
    * Initialize a new Divine Clash
    */
-  async startClash(participants, vitalityCounts = {}) {
+  async startClash(participants, vitalityCounts = {}, initialStones = {}) {
     this.activeClash = {
       participants: participants,
       roundNumber: 0,
@@ -107,12 +107,22 @@ class DivineClashManager {
     // Initialize player states
     for (const participant of participants) {
       const vitality = vitalityCounts[participant.id] || 10;
+      const stones = initialStones[participant.id] || { attack: 5, defense: 5 };
+      
+      // Create initial stone pool
+      const totalStones = stones.attack + stones.defense;
+      const readyStones = Array(totalStones).fill(null).map((_, i) => ({
+        id: `stone-${participant.id}-${Date.now()}-${i}`,
+        type: 'power'
+      }));
+
       this.playerStates.set(participant.id, {
         userId: participant.id,
         actorId: participant.actorId,
+        tokenId: participant.tokenId,
         vitality: vitality,
         vitalityMax: vitality,
-        ready: [],
+        ready: readyStones,
         exhausted: [],
         burned: [],
         masteryRank: this.getMasteryRank(participant.actorId),
@@ -464,7 +474,7 @@ class DivineClashUI extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: 'divine-clash-ui',
       title: 'Divine Clash',
-      template: './templates/divine-clash-ui.html',
+      template: 'modules/divine-clash/templates/divine-clash-ui.html',
       width: 900,
       height: 700,
       resizable: true,
@@ -793,15 +803,24 @@ class GroupDefenseDialog extends Dialog {
  */
 class StartClashDialog extends Dialog {
   static getContent() {
-    let content = '<div class="start-clash-dialog">';
-    content += '<p>Select participants for the Divine Clash:</p>';
-    content += '<table><thead><tr><th>Select</th><th>Actor</th><th>Player</th><th>Vitality</th></tr></thead><tbody>';
+    // Get selected tokens from the canvas
+    const selectedTokens = canvas.tokens.controlled;
+    
+    if (selectedTokens.length === 0) {
+      return '<div class="start-clash-dialog"><p style="color: red;">Bitte wähle zuerst Tokens auf der Map aus!</p></div>';
+    }
 
-    for (const actor of game.actors) {
+    let content = '<div class="start-clash-dialog">';
+    content += '<p>Teilnehmer aus ausgewählten Tokens:</p>';
+    content += '<table><thead><tr><th>Select</th><th>Token</th><th>Vitality</th><th>Attack Stones</th><th>Defense Stones</th></tr></thead><tbody>';
+
+    for (const token of selectedTokens) {
+      const actor = token.actor;
+      if (!actor) continue;
+
       // Get the first player owner or use GM
       let userId = null;
       if (game.user.isGM) {
-        // GM can select any actor
         userId = game.userId;
       } else if (actor.hasPlayerOwner) {
         const owners = Object.entries(actor.ownership || {})
@@ -814,13 +833,23 @@ class StartClashDialog extends Dialog {
       }
 
       if (userId || game.user.isGM) {
-        const actorName = actor.name || 'Unknown';
+        const tokenName = token.name || actor.name || 'Unknown';
         const playerName = userId ? game.users.get(userId)?.name || 'Unknown' : 'GM';
+        
+        // Get values from token flags or defaults
+        const vitality = token.getFlag('divine-clash', 'vitality') || 
+                        actor.getFlag('divine-clash', 'vitality') || 10;
+        const attackStones = token.getFlag('divine-clash', 'attackStones') || 
+                            actor.getFlag('divine-clash', 'attackStones') || 5;
+        const defenseStones = token.getFlag('divine-clash', 'defenseStones') || 
+                             actor.getFlag('divine-clash', 'defenseStones') || 5;
+        
         content += `<tr>
-          <td><input type="checkbox" data-user-id="${userId || game.userId}" data-actor-id="${actor.id}"></td>
-          <td>${actorName}</td>
-          <td>${playerName}</td>
-          <td><input type="number" class="vitality-input" value="10" min="1" max="50"></td>
+          <td><input type="checkbox" data-user-id="${userId || game.userId}" data-actor-id="${actor.id}" data-token-id="${token.id}" checked></td>
+          <td>${tokenName} (${playerName})</td>
+          <td><input type="number" class="vitality-input" value="${vitality}" min="1" max="50"></td>
+          <td><input type="number" class="attack-stones-input" value="${attackStones}" min="0" max="50"></td>
+          <td><input type="number" class="defense-stones-input" value="${defenseStones}" min="0" max="50"></td>
         </tr>`;
       }
     }
@@ -839,14 +868,21 @@ class StartClashDialog extends Dialog {
           callback: async (html) => {
             const participants = [];
             const vitalityCounts = {};
+            const initialStones = {};
 
             html.find('input[type="checkbox"]:checked').each(function() {
               const userId = $(this).data('user-id');
               const actorId = $(this).data('actor-id');
-              const vitality = parseInt($(this).closest('tr').find('.vitality-input').val()) || 10;
+              const tokenId = $(this).data('token-id');
+              const row = $(this).closest('tr');
               
-              participants.push({ id: userId, actorId: actorId });
+              const vitality = parseInt(row.find('.vitality-input').val()) || 10;
+              const attackStones = parseInt(row.find('.attack-stones-input').val()) || 5;
+              const defenseStones = parseInt(row.find('.defense-stones-input').val()) || 5;
+              
+              participants.push({ id: userId, actorId: actorId, tokenId: tokenId });
               vitalityCounts[userId] = vitality;
+              initialStones[userId] = { attack: attackStones, defense: defenseStones };
             });
 
             if (participants.length < 2) {
@@ -854,7 +890,7 @@ class StartClashDialog extends Dialog {
               return false;
             }
 
-            await divineClashManager.startClash(participants, vitalityCounts);
+            await divineClashManager.startClash(participants, vitalityCounts, initialStones);
           }
         },
         cancel: {

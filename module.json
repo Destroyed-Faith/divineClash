@@ -2,14 +2,14 @@
   "id": "divine-clash",
   "title": "Divine Clash",
   "description": "A dice-less combat system for Foundry VTT where players use stones instead of dice for divine combat.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": {
     "minimum": "10",
     "verified": "11"
   },
   "authors": [
     {
-      "name": "Destroyed-Faith"
+      "name": "Your Name"
     }
   ],
   "esmodules": [
@@ -31,8 +31,8 @@
     }
   ],
   "socket": true,
-  "url": "https://github.com/Destroyed-Faith/divineClash",
-  "manifest": "https://raw.githubusercontent.com/Destroyed-Faith/divineClash/main/module.json",
-  "download": "https://github.com/Destroyed-Faith/divineClash/archive/refs/heads/main.zip"
+  "url": "",
+  "manifest": "",
+  "download": ""
 }
 
