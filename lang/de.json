@@ -1,0 +1,31 @@
+{
+  "divine-clash": {
+    "title": "Göttlicher Zusammenstoß",
+    "start": "Kampf starten",
+    "reveal": "Zuteilungen aufdecken",
+    "resolve": "Kampf auflösen",
+    "regenerate": "Regenerieren",
+    "allocate": "Zuteilen",
+    "distribute": "Steine verteilen",
+    "vitality": "Vitalität",
+    "ready": "Bereit",
+    "exhausted": "Erschöpft",
+    "burned": "Verbrannt",
+    "attack": "Angriff",
+    "defense": "Verteidigung",
+    "allocation-hidden": "Zuteilung verborgen",
+    "your-allocation": "Deine Zuteilung",
+    "overdrive": "Überlastung",
+    "activate-overdrive": "Überlastung aktivieren",
+    "burn-stones": "Steine verbrennen",
+    "attack-bonus": "Angriffsbonus",
+    "defense-bonus": "Verteidigungsbonus",
+    "team-actions": "Team-Aktionen",
+    "combined-attack": "Kombinierter Angriff",
+    "group-defense": "Gruppenverteidigung",
+    "not-enough-stones": "Nicht genug Steine!",
+    "only-gm": "Nur der SL kann diese Aktion ausführen",
+    "select-participants": "Teilnehmer für den Göttlichen Zusammenstoß auswählen"
+  }
+}
+

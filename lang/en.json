@@ -1,0 +1,31 @@
+{
+  "divine-clash": {
+    "title": "Divine Clash",
+    "start": "Start Clash",
+    "reveal": "Reveal Allocations",
+    "resolve": "Resolve Combat",
+    "regenerate": "Regenerate",
+    "allocate": "Allocate",
+    "distribute": "Distribute Stones",
+    "vitality": "Vitality",
+    "ready": "Ready",
+    "exhausted": "Exhausted",
+    "burned": "Burned",
+    "attack": "Attack",
+    "defense": "Defense",
+    "allocation-hidden": "Allocation Hidden",
+    "your-allocation": "Your Allocation",
+    "overdrive": "Overdrive",
+    "activate-overdrive": "Activate Overdrive",
+    "burn-stones": "Burn Stones",
+    "attack-bonus": "Attack Bonus",
+    "defense-bonus": "Defense Bonus",
+    "team-actions": "Team Actions",
+    "combined-attack": "Combined Attack",
+    "group-defense": "Group Defense",
+    "not-enough-stones": "Not enough stones!",
+    "only-gm": "Only the GM can perform this action",
+    "select-participants": "Select participants for the Divine Clash"
+  }
+}
+

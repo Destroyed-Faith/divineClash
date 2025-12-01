@@ -1,0 +1,133 @@
+<div class="divine-clash-container">
+  <div class="divine-clash-header">
+    <h2>Divine Clash</h2>
+    <div class="clash-controls">
+      {{#if isGM}}
+      <button class="reveal-btn" data-action="reveal">Reveal Allocations</button>
+      <button class="resolve-btn" data-action="resolve">Resolve Combat</button>
+      <button class="regenerate-btn" data-action="regenerate">Regenerate</button>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="participants-container">
+    {{#each participants}}
+    <div class="participant-panel" data-user-id="{{userId}}">
+      <div class="participant-header">
+        <h3>{{actorName}}</h3>
+        <div class="vitality-display">
+          <span class="vitality-label">Vitality:</span>
+          <span class="vitality-value {{#if (lt vitality 5)}}low-vitality{{/if}}">{{vitality}}/{{vitalityMax}}</span>
+        </div>
+      </div>
+
+      <div class="stone-pools">
+        <div class="stone-pool ready">
+          <h4>Ready</h4>
+          <div class="stone-count">{{ready.length}}</div>
+          <div class="stone-visual">
+            {{#each ready}}
+            <div class="stone stone-ready" title="Ready Stone"></div>
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="stone-pool exhausted">
+          <h4>Exhausted</h4>
+          <div class="stone-count">{{exhausted.length}}</div>
+          <div class="stone-visual">
+            {{#each exhausted}}
+            <div class="stone stone-exhausted" title="Exhausted Stone"></div>
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="stone-pool burned">
+          <h4>Burned</h4>
+          <div class="stone-count">{{burned.length}}</div>
+          <div class="stone-visual">
+            {{#each burned}}
+            <div class="stone stone-burned" title="Burned Stone"></div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+
+      <div class="allocation-section">
+        <div class="allocation-controls">
+          <div class="allocation-input">
+            <label>Attack:</label>
+            <input type="number" class="attack-input" value="{{allocation.attack}}" min="0" max="{{ready.length}}" 
+                   {{#unless isOwner}}disabled{{/unless}}>
+          </div>
+          <div class="allocation-input">
+            <label>Defense:</label>
+            <input type="number" class="defense-input" value="{{allocation.defense}}" min="0" max="{{ready.length}}"
+                   {{#unless isOwner}}disabled{{/unless}}>
+          </div>
+          {{#if isOwner}}
+          <button class="allocate-btn" data-action="allocate">Allocate</button>
+          {{/if}}
+        </div>
+
+        {{#if allocation.revealed}}
+        <div class="allocation-revealed">
+          <div class="revealed-attack">A: {{allocation.attack}}</div>
+          <div class="revealed-defense">D: {{allocation.defense}}</div>
+        </div>
+        {{else}}
+        <div class="allocation-hidden">
+          {{#if isOwner}}
+            <div class="your-allocation">Your Allocation: A: {{allocation.attack}} D: {{allocation.defense}}</div>
+          {{else}}
+            <div class="hidden-allocation">Allocation Hidden</div>
+          {{/if}}
+        </div>
+        {{/if}}
+      </div>
+
+      {{#if ../isGM}}
+      <div class="gm-controls">
+        <button class="distribute-btn" data-action="distribute" data-user-id="{{userId}}">
+          Distribute Stones
+        </button>
+        <input type="number" class="stone-count-input" value="5" min="1" max="20">
+      </div>
+      {{/if}}
+
+      {{#if isOwner}}
+      <div class="overdrive-section-panel">
+        <label>
+          <input type="checkbox" class="overdrive-checkbox">
+          Activate Overdrive
+        </label>
+        <div class="overdrive-inputs" style="display: none;">
+          <div class="overdrive-input">
+            <label>Burn Stones:</label>
+            <input type="number" class="burn-input" value="0" min="0" max="10">
+          </div>
+          <div class="overdrive-input">
+            <label>Attack Bonus:</label>
+            <input type="number" class="attack-bonus-input" value="0" min="0" max="40">
+          </div>
+          <div class="overdrive-input">
+            <label>Defense Bonus:</label>
+            <input type="number" class="defense-bonus-input" value="0" min="0" max="40">
+          </div>
+        </div>
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+
+  {{#if isGM}}
+  <div class="team-actions-section">
+    <h3>Team Actions</h3>
+    <div class="team-controls">
+      <button class="combined-attack-btn" data-action="combined-attack">Combined Attack</button>
+      <button class="group-defense-btn" data-action="group-defense">Group Defense</button>
+    </div>
+  </div>
+  {{/if}}
+</div>

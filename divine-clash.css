@@ -1,0 +1,443 @@
+/* Divine Clash Styles */
+
+.divine-clash-container {
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
+  color: #fff;
+  font-family: 'Signika', sans-serif;
+}
+
+.divine-clash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #4a4a4a;
+}
+
+.divine-clash-header h2 {
+  margin: 0;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.clash-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.clash-controls button {
+  padding: 8px 16px;
+  background: #4a5568;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.clash-controls button:hover:not(:disabled) {
+  background: #2d3748;
+}
+
+.clash-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reveal-btn {
+  background: #48bb78 !important;
+}
+
+.resolve-btn {
+  background: #f56565 !important;
+}
+
+.regenerate-btn {
+  background: #4299e1 !important;
+}
+
+.participants-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.participant-panel {
+  background: rgba(30, 30, 30, 0.9);
+  border: 2px solid #4a4a4a;
+  border-radius: 8px;
+  padding: 15px;
+  transition: border-color 0.3s;
+}
+
+.participant-panel:hover {
+  border-color: #ffd700;
+}
+
+.participant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #4a4a4a;
+}
+
+.participant-header h3 {
+  margin: 0;
+  color: #ffd700;
+}
+
+.vitality-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vitality-label {
+  font-weight: bold;
+  color: #f56565;
+}
+
+.vitality-value {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #f56565;
+}
+
+.vitality-value.low-vitality {
+  color: #ff0000;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.stone-pools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.stone-pool {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 10px;
+  text-align: center;
+}
+
+.stone-pool h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.stone-count {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stone-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.stone {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.stone-ready {
+  background: #48bb78;
+  box-shadow: 0 0 5px rgba(72, 187, 120, 0.5);
+}
+
+.stone-exhausted {
+  background: #ed8936;
+  opacity: 0.6;
+}
+
+.stone-burned {
+  background: #2d3748;
+  opacity: 0.4;
+}
+
+.allocation-section {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.allocation-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.allocation-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.allocation-input label {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.allocation-input input {
+  width: 60px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #fff;
+  text-align: center;
+}
+
+.allocate-btn {
+  padding: 8px 16px;
+  background: #4299e1;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  align-self: flex-end;
+}
+
+.allocate-btn:hover:not(:disabled) {
+  background: #3182ce;
+}
+
+.allocation-revealed {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 10px;
+  background: rgba(72, 187, 120, 0.2);
+  border-radius: 4px;
+  border: 2px solid #48bb78;
+}
+
+.revealed-attack,
+.revealed-defense {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.revealed-attack {
+  color: #f56565;
+}
+
+.revealed-defense {
+  color: #4299e1;
+}
+
+.allocation-hidden {
+  text-align: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 2px dashed #4a4a4a;
+}
+
+.your-allocation {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.hidden-allocation {
+  color: #888;
+  font-style: italic;
+}
+
+.gm-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #4a4a4a;
+}
+
+.distribute-btn {
+  padding: 6px 12px;
+  background: #9f7aea;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.distribute-btn:hover {
+  background: #805ad5;
+}
+
+.stone-count-input {
+  width: 60px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #fff;
+  text-align: center;
+}
+
+.overdrive-section-panel {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(139, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px solid #8b0000;
+}
+
+.overdrive-section,
+.team-actions-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid #4a4a4a;
+}
+
+.overdrive-section h3,
+.team-actions-section h3 {
+  margin: 0 0 10px 0;
+  color: #ffd700;
+}
+
+.overdrive-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.overdrive-controls label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.overdrive-inputs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.overdrive-inputs label {
+  font-weight: normal;
+}
+
+.overdrive-inputs input {
+  width: 60px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #fff;
+  text-align: center;
+}
+
+.team-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.combined-attack-btn,
+.group-defense-btn {
+  padding: 8px 16px;
+  background: #ed8936;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.combined-attack-btn:hover,
+.group-defense-btn:hover {
+  background: #dd6b20;
+}
+
+/* Dialog Styles */
+.divine-clash-dialog {
+  min-width: 800px;
+}
+
+.divine-clash-dialog .window-content {
+  padding: 0;
+}
+
+/* Stone Distribution Dialog */
+.stone-distribution-dialog {
+  padding: 20px;
+}
+
+.stone-distribution-dialog h3 {
+  margin-top: 0;
+  color: #ffd700;
+}
+
+.participant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.participant-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.participant-item input {
+  width: 80px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .participants-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .allocation-controls {
+    flex-direction: column;
+  }
+  
+  .overdrive-inputs {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
