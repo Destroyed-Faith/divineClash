@@ -111,11 +111,12 @@ class DivineClashManager {
   /**
    * Initialize a new Divine Clash
    */
-  async startClash(participants, vitalityCounts = {}, initialStones = {}) {
+  async startClash(participants, vitalityCounts = {}, initialStones = {}, clashName = 'Divine Clash') {
     this.activeClash = {
       participants: participants,
       roundNumber: 0,
-      phase: 'setup'
+      phase: 'setup',
+      name: clashName
     };
 
     // Initialize player states
@@ -533,6 +534,7 @@ class DivineClashUI extends Application {
     const states = this.manager.getAllStates();
     const currentUserId = game.userId;
     const isGM = game.user.isGM;
+    const clashName = this.manager.activeClash?.name || 'Divine Clash';
 
     const participants = states.map(state => {
       const actor = game.actors.get(state.actorId);
@@ -569,7 +571,8 @@ class DivineClashUI extends Application {
       participants: participants,
       isGM: isGM,
       currentUserId: currentUserId,
-      readySummary
+      readySummary,
+      clashName
     };
   }
 
@@ -929,6 +932,7 @@ class StartClashDialog extends Dialog {
 
     let content = '<div class="start-clash-dialog">';
     content += '<p>Teilnehmer aus ausgewählten Tokens:</p>';
+    content += '<div class="clash-name-row"><label>Clash Name:</label> <input type="text" class="clash-name-input" value="Divine Clash"></div>';
     content += '<table><thead><tr><th>Select</th><th>Token</th><th>Vitality</th><th>Active Stones (Attack)</th><th>Active Stones (Defense)</th></tr></thead><tbody>';
 
     for (const token of selectedTokens) {
@@ -987,6 +991,7 @@ class StartClashDialog extends Dialog {
             const participants = [];
             const vitalityCounts = {};
             const initialStones = {};
+            const clashName = html.find('.clash-name-input').val() || 'Divine Clash';
 
             html.find('input[type="checkbox"]:checked').each(function() {
               const userId = $(this).data('user-id');
@@ -1008,7 +1013,7 @@ class StartClashDialog extends Dialog {
               return false;
             }
 
-            await divineClashManager.startClash(participants, vitalityCounts, initialStones);
+            await divineClashManager.startClash(participants, vitalityCounts, initialStones, clashName);
           }
         },
         cancel: {
@@ -1054,7 +1059,7 @@ Hooks.once('ready', async function() {
  */
 window.DivineClash = {
   getManager: () => divineClashManager,
-  startClash: (participants, vitalityCounts) => divineClashManager?.startClash(participants, vitalityCounts),
+  startClash: (participants, vitalityCounts, initialStones, clashName) => divineClashManager?.startClash(participants, vitalityCounts, initialStones, clashName),
   distributeStones: (userId, stones) => divineClashManager?.distributeStones(userId, stones),
   resetAllocation: (userId) => divineClashManager?.resetAllocation(userId)
 };

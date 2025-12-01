@@ -23,6 +23,22 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.clash-name-row {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clash-name-row input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #4a4a4a;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+}
+
 .ready-summary {
   font-size: 0.9em;
   color: #cbd5ff;
@@ -241,6 +257,11 @@
   margin-left: 6px;
 }
 
+.stone-drop-zone.small {
+  flex: 1;
+  min-width: 120px;
+}
+
 .stone-zone-body {
   min-height: 70px;
   padding: 10px;
@@ -296,6 +317,18 @@
   cursor: grab;
 }
 
+.stone-cube.opponent {
+  cursor: default;
+}
+
+.stone-cube.opponent.attack {
+  background: linear-gradient(145deg, #ff6b6b, #c53030);
+}
+
+.stone-cube.opponent.defense {
+  background: linear-gradient(145deg, #63b3ed, #2b6cb0);
+}
+
 .stone-cube.dragging {
   opacity: 0.5;
 }
@@ -348,6 +381,15 @@
 .allocation-summary.viewer {
   flex-direction: column;
   gap: 6px;
+}
+
+.opponent-board {
+  display: flex;
+  gap: 10px;
+}
+
+.opponent-board .stone-zone-body {
+  min-height: 40px;
 }
 
 .allocation-controls {

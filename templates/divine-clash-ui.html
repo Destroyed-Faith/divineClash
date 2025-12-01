@@ -1,7 +1,7 @@
 <div class="divine-clash-container">
   <div class="divine-clash-header">
     <div>
-      <h2>Divine Clash</h2>
+      <h2>{{clashName}}</h2>
       <div class="ready-summary">
         Ready: {{readySummary.ready}} / {{readySummary.total}}
       </div>
@@ -21,10 +21,6 @@
       <div class="participant-header">
         <div>
           <h3>{{actorName}}</h3>
-          <div class="vitality-display">
-            <span class="vitality-label">Vitality:</span>
-            <span class="vitality-value {{#if (lt vitality 3)}}low-vitality{{/if}}">{{vitality}}/{{vitalityMax}}</span>
-          </div>
         </div>
         <div class="status-pill {{#if allocation.ready}}ready{{else}}pending{{/if}}">
           {{#if allocation.ready}}Ready{{else}}Distributing{{/if}}
@@ -75,7 +71,7 @@
                 </div>
               </div>
               <div class="ready-zone stone-drop-zone" data-zone="ready">
-                <div class="zone-header">Available Stones <span class="zone-count ready-count">{{ready.length}}</span></div>
+                <div class="zone-header">Total Stone Pool <span class="zone-count ready-count">{{ready.length}}</span></div>
                 <div class="stone-zone-body">
                   {{#each ready}}
                     <div class="stone-cube stone-draggable" draggable="true" data-stone-id="{{#if id}}{{id}}{{else}}{{@index}}{{/if}}"></div>
@@ -98,15 +94,30 @@
         {{else}}
           <div class="allocation-summary viewer">
             {{#if (or ../isGM allocation.revealed)}}
-              <div>Active Stones (Attack): <strong>{{allocation.attack}}</strong></div>
-              <div>Active Stones (Defense): <strong>{{allocation.defense}}</strong></div>
+              <div class="opponent-board">
+                <div class="stone-drop-zone small">
+                  <div class="zone-header">Attack</div>
+                  <div class="stone-zone-body">
+                    {{#repeat allocation.attack}}
+                      <div class="stone-cube opponent attack"></div>
+                    {{/repeat}}
+                  </div>
+                </div>
+                <div class="stone-drop-zone small">
+                  <div class="zone-header">Defense</div>
+                  <div class="stone-zone-body">
+                    {{#repeat allocation.defense}}
+                      <div class="stone-cube opponent defense"></div>
+                    {{/repeat}}
+                  </div>
+                </div>
+              </div>
             {{else}}
               <div class="hidden-allocation">Allocation Hidden</div>
             {{/if}}
           </div>
         {{/if}}
       </div>
-
       {{#if isOwner}}
       <div class="overdrive-section-panel">
         <label>
