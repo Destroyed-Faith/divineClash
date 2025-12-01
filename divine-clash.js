@@ -792,47 +792,47 @@ class GroupDefenseDialog extends Dialog {
  * Start Clash Dialog
  */
 class StartClashDialog extends Dialog {
-  constructor() {
-    const getContent = () => {
-      let content = '<div class="start-clash-dialog">';
-      content += '<p>Select participants for the Divine Clash:</p>';
-      content += '<table><thead><tr><th>Select</th><th>Actor</th><th>Player</th><th>Vitality</th></tr></thead><tbody>';
+  static getContent() {
+    let content = '<div class="start-clash-dialog">';
+    content += '<p>Select participants for the Divine Clash:</p>';
+    content += '<table><thead><tr><th>Select</th><th>Actor</th><th>Player</th><th>Vitality</th></tr></thead><tbody>';
 
-      for (const actor of game.actors) {
-        // Get the first player owner or use GM
-        let userId = null;
-        if (game.user.isGM) {
-          // GM can select any actor
-          userId = game.userId;
-        } else if (actor.hasPlayerOwner) {
-          const owners = Object.entries(actor.ownership || {})
-            .filter(([id, level]) => level >= 3)
-            .map(([id]) => game.users.get(id))
-            .filter(u => u && u.active);
-          if (owners.length > 0) {
-            userId = owners[0].id;
-          }
-        }
-
-        if (userId || game.user.isGM) {
-          const actorName = actor.name || 'Unknown';
-          const playerName = userId ? game.users.get(userId)?.name || 'Unknown' : 'GM';
-          content += `<tr>
-            <td><input type="checkbox" data-user-id="${userId || game.userId}" data-actor-id="${actor.id}"></td>
-            <td>${actorName}</td>
-            <td>${playerName}</td>
-            <td><input type="number" class="vitality-input" value="10" min="1" max="50"></td>
-          </tr>`;
+    for (const actor of game.actors) {
+      // Get the first player owner or use GM
+      let userId = null;
+      if (game.user.isGM) {
+        // GM can select any actor
+        userId = game.userId;
+      } else if (actor.hasPlayerOwner) {
+        const owners = Object.entries(actor.ownership || {})
+          .filter(([id, level]) => level >= 3)
+          .map(([id]) => game.users.get(id))
+          .filter(u => u && u.active);
+        if (owners.length > 0) {
+          userId = owners[0].id;
         }
       }
 
-      content += '</tbody></table></div>';
-      return content;
-    };
+      if (userId || game.user.isGM) {
+        const actorName = actor.name || 'Unknown';
+        const playerName = userId ? game.users.get(userId)?.name || 'Unknown' : 'GM';
+        content += `<tr>
+          <td><input type="checkbox" data-user-id="${userId || game.userId}" data-actor-id="${actor.id}"></td>
+          <td>${actorName}</td>
+          <td>${playerName}</td>
+          <td><input type="number" class="vitality-input" value="10" min="1" max="50"></td>
+        </tr>`;
+      }
+    }
 
+    content += '</tbody></table></div>';
+    return content;
+  }
+
+  constructor() {
     super({
       title: 'Start Divine Clash',
-      content: getContent(),
+      content: StartClashDialog.getContent(),
       buttons: {
         start: {
           label: 'Start Clash',
