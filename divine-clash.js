@@ -816,6 +816,7 @@ class StartClashDialog extends Dialog {
 
     for (const token of selectedTokens) {
       const actor = token.actor;
+      const tokenDoc = token.document ?? token;
       if (!actor) continue;
 
       // Get the first player owner or use GM
@@ -837,12 +838,12 @@ class StartClashDialog extends Dialog {
         const playerName = userId ? game.users.get(userId)?.name || 'Unknown' : 'GM';
         
         // Get values from token flags or defaults
-        const vitality = token.getFlag('divine-clash', 'vitality') || 
-                        actor.getFlag('divine-clash', 'vitality') || 10;
-        const attackStones = token.getFlag('divine-clash', 'attackStones') || 
-                            actor.getFlag('divine-clash', 'attackStones') || 5;
-        const defenseStones = token.getFlag('divine-clash', 'defenseStones') || 
-                             actor.getFlag('divine-clash', 'defenseStones') || 5;
+        const vitality = (tokenDoc.getFlag?.('divine-clash', 'vitality')) ?? 
+                        (actor.getFlag?.('divine-clash', 'vitality')) ?? 10;
+        const attackStones = (tokenDoc.getFlag?.('divine-clash', 'attackStones')) ?? 
+                            (actor.getFlag?.('divine-clash', 'attackStones')) ?? 5;
+        const defenseStones = (tokenDoc.getFlag?.('divine-clash', 'defenseStones')) ?? 
+                             (actor.getFlag?.('divine-clash', 'defenseStones')) ?? 5;
         
         content += `<tr>
           <td><input type="checkbox" data-user-id="${userId || game.userId}" data-actor-id="${actor.id}" data-token-id="${token.id}" checked></td>
