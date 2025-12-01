@@ -33,6 +33,6 @@
   "socket": true,
   "url": "https://github.com/Destroyed-Faith/divineClash",
   "manifest": "https://raw.githubusercontent.com/Destroyed-Faith/divineClash/main/module.json",
-  "download": "https://github.com/Destroyed-Faith/divineClash/releases/latest/download/divine-clash.zip"
+  "download": "https://github.com/Destroyed-Faith/divineClash/archive/refs/heads/main.zip"
 }
 
