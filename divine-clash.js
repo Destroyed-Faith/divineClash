@@ -581,9 +581,6 @@ class DivineClashUI extends Application {
     html.find('.resolve-btn').on('click', this._onResolve.bind(this));
     html.find('.regenerate-btn').on('click', this._onRegenerate.bind(this));
 
-    // GM controls
-    html.find('.distribute-btn').on('click', this._onDistributeStones.bind(this));
-
     // Player distribution controls
     html.find('.finish-btn').on('click', this._onFinishDistribution.bind(this));
     html.find('.reset-allocation-btn').on('click', this._onResetDistribution.bind(this));
@@ -659,26 +656,6 @@ class DivineClashUI extends Application {
 
     await this.manager.regenerate();
     ui.notifications.info('Stones regenerated!');
-  }
-
-  async _onDistributeStones(event) {
-    if (!game.user.isGM) {
-      ui.notifications.error('Only the GM can distribute stones');
-      return;
-    }
-
-    const button = $(event.currentTarget);
-    const userId = button.data('user-id');
-    const count = parseInt(button.siblings('.stone-count-input').val()) || 5;
-
-    // Create stones (simple objects for now)
-    const stones = Array(count).fill(null).map((_, i) => ({
-      id: `stone-${Date.now()}-${i}`,
-      type: 'power'
-    }));
-
-    await this.manager.distributeStones(userId, stones);
-    ui.notifications.info(`Distributed ${count} stones`);
   }
 
   async _onFinishDistribution(event) {

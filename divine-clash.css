@@ -145,7 +145,7 @@
 
 .stone-pools {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 15px;
 }
@@ -209,7 +209,7 @@
 
 .distribution-board {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
   margin-top: 10px;
 }
@@ -247,6 +247,43 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.allocation-zones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ready-zone {
+  width: 100%;
+}
+
+.vitality-track {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.vitality-header {
+  font-size: 0.85em;
+  text-transform: uppercase;
+  color: #cbd5ff;
+  margin-bottom: 6px;
+}
+
+.vitality-stones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vitality-stone {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #f7fafc;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 .stone-cube {

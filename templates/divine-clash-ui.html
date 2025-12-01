@@ -32,16 +32,6 @@
       </div>
 
       <div class="stone-pools">
-        <div class="stone-pool ready">
-          <h4>Ready</h4>
-          <div class="stone-count">{{ready.length}}</div>
-          <div class="stone-visual">
-            {{#each ready}}
-            <div class="stone stone-ready" title="Ready Stone"></div>
-            {{/each}}
-          </div>
-        </div>
-
         <div class="stone-pool exhausted">
           <h4>Exhausted</h4>
           <div class="stone-count">{{exhausted.length}}</div>
@@ -51,7 +41,6 @@
             {{/each}}
           </div>
         </div>
-
         <div class="stone-pool burned">
           <h4>Burned</h4>
           <div class="stone-count">{{burned.length}}</div>
@@ -75,14 +64,6 @@
             </div>
           {{else}}
             <div class="distribution-board">
-              <div class="ready-zone stone-drop-zone" data-zone="ready">
-                <div class="zone-header">Available Stones <span class="zone-count ready-count">{{ready.length}}</span></div>
-                <div class="stone-zone-body">
-                  {{#each ready}}
-                    <div class="stone-cube stone-draggable" draggable="true" data-stone-id="{{#if id}}{{id}}{{else}}{{@index}}{{/if}}"></div>
-                  {{/each}}
-                </div>
-              </div>
               <div class="allocation-zones">
                 <div class="stone-drop-zone attack-zone" data-zone="attack">
                   <div class="zone-header">Active Stones (Attack) <span class="zone-count">0</span></div>
@@ -91,6 +72,22 @@
                 <div class="stone-drop-zone defense-zone" data-zone="defense">
                   <div class="zone-header">Active Stones (Defense) <span class="zone-count">0</span></div>
                   <div class="stone-zone-body"></div>
+                </div>
+              </div>
+              <div class="ready-zone stone-drop-zone" data-zone="ready">
+                <div class="zone-header">Available Stones <span class="zone-count ready-count">{{ready.length}}</span></div>
+                <div class="stone-zone-body">
+                  {{#each ready}}
+                    <div class="stone-cube stone-draggable" draggable="true" data-stone-id="{{#if id}}{{id}}{{else}}{{@index}}{{/if}}"></div>
+                  {{/each}}
+                </div>
+                <div class="vitality-track">
+                  <div class="vitality-header">Vitality (HP): {{vitality}}</div>
+                  <div class="vitality-stones">
+                    {{#repeat vitality}}
+                      <div class="vitality-stone"></div>
+                    {{/repeat}}
+                  </div>
                 </div>
               </div>
             </div>
@@ -109,15 +106,6 @@
           </div>
         {{/if}}
       </div>
-
-      {{#if ../isGM}}
-      <div class="gm-controls">
-        <button class="distribute-btn" data-action="distribute" data-user-id="{{userId}}">
-          Distribute Stones
-        </button>
-        <input type="number" class="stone-count-input" value="5" min="1" max="20">
-      </div>
-      {{/if}}
 
       {{#if isOwner}}
       <div class="overdrive-section-panel">
